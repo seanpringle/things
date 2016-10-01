@@ -16,6 +16,7 @@ function pine1() = [ 1200, 75, 30 ];
 function pine2() = [ 1200, 75, 45 ];
 function pine3() = [ 1200, 90, 19 ];
 function pine4() = [ 1200, 42, 19 ];
+function pine5() = [ 1200, 42, 42 ];
 
 function cut(v,l) = [         l,  width(v), height(v) ];
 function stand(v) = [ height(v),  width(v), length(v) ];
@@ -25,11 +26,11 @@ function roll(v)  = [ length(v), height(v),  width(v) ];
 surface_z = height(mdf1());
 shelf_z = height(pine3());
 clearance_z = 100;
-work_z = 950;
+work_z = 750;
 
 bbox_x = length(mdf1());
 bbox_y = width(mdf1());
-bbox_z = length(pine1());
+bbox_z = work_z + 250;
 
 function bbox000(v) = [                  0,                 0,                  0 ];
 function bbox001(v) = [                  0,                 0, bbox_z - height(v) ];
@@ -46,13 +47,16 @@ module component(v, name)
   echo(name, v);
 }
 
-function leg()   = spin(stand(cut(pine1(), work_z - surface_z)));
-function bleg()  = spin(stand(cut(pine1(), bbox_z - shelf_z )));
+function leg()   = spin(stand(cut(pine5(), work_z - surface_z)));
+function bleg()  = spin(stand(cut(pine5(), bbox_z - shelf_z )));
 function xbeam() = roll(cut(pine3(), bbox_x));
 function ybeam() = spin(roll(cut(pine3(), bbox_y - y(xbeam())*2)));
 function top()   = mdf1();
 function shelf() = cut(pine3(), bbox_x);
 function lip()   = roll(cut(pine4(), bbox_x));
+function dtop()  = cut(mdf1(), 500);
+function xdraw() = roll(cut(pine3(), 500));
+function zdraw() = stand(cut(pine5(), 500 - z(top())));
 
 function fbox000(v) = bbox000(v) + [ 0, 0, 0 ];
 function fbox001(v) = bbox001(v) + [ 0, 0, -(bbox_z-work_z)-surface_z ];
@@ -81,14 +85,6 @@ color(pine)
     translate([ -x(ybeam()), -x(ybeam()), 0 ])
       component(bleg(), "leg (back right)");
 
-  translate(fbox000(xbeam()))
-    translate([ 0, 0, clearance_z ])
-      component(xbeam(), "xbeam (front lower)");
-
-  translate(fbox010(xbeam()))
-    translate([ 0, 0, clearance_z ])
-      component(xbeam(), "xbeam (back lower)");
-
   translate(fbox001(xbeam()))
     translate([ 0, 0, 0 ])
       component(xbeam(), "xbeam (front upper)");
@@ -96,14 +92,6 @@ color(pine)
   translate(fbox011(xbeam()))
     translate([ 0, 0, 0 ])
       component(xbeam(), "xbeam (back upper)");
-
-  translate(fbox000(ybeam()))
-    translate([ 0, x(ybeam()), clearance_z ])
-      component(ybeam(), "ybeam");
-
-  translate(fbox100(ybeam()))
-    translate([ 0, x(ybeam()), clearance_z ])
-      component(ybeam(), "ybeam");
 
   translate(fbox001(ybeam()))
     translate([ 0, x(ybeam()), 0 ])
@@ -121,14 +109,6 @@ color(pine)
     translate([ bbox_x - bbox_x/3, x(ybeam()), 0 ])
       component(ybeam(), "ybeam");
 
-  translate(fbox000(ybeam()))
-    translate([ bbox_x/3, y(xbeam()), clearance_z ])
-      #component(ybeam(), "ybeam");
-
-  translate(fbox000(ybeam()))
-    translate([ bbox_x - bbox_x/3, y(xbeam()), clearance_z ])
-      component(ybeam(), "ybeam");
-
   translate(bbox011(shelf()))
     translate([ 0, -y(xbeam()), 0 ])
       component(shelf(), "shelf");
@@ -140,6 +120,31 @@ color(pine)
   translate(bbox011(lip()))
     translate([ 0, -(y(pine3()) + z(pine3())), z(lip()) - z(shelf()) ])
       component(lip(), "shelf lip");
+
+  translate(bbox000(xdraw()))
+    translate([ 0, 0, work_z - 500 ])
+      component(xdraw(), "xdraw front");
+
+  translate(bbox010(xdraw()))
+    translate([ 0, 0, work_z - 500 ])
+      component(xdraw(), "xdraw back");
+
+  translate(bbox000(ybeam()))
+    translate([ 0, y(xdraw()), work_z - 500 ])
+      component(ybeam(), "xdraw left");
+
+  translate(bbox000(ybeam()))
+    translate([ x(xdraw()) - x(ybeam()), y(xdraw()), work_z - 500 ])
+      component(ybeam(), "xdraw right");
+
+  translate(bbox000(zdraw()))
+    translate([ 500 - x(zdraw()) - x(ybeam()), y(xdraw()), work_z - 500 ])
+      component(zdraw(), "zdraw front");
+
+  translate(bbox010(zdraw()))
+    translate([ 500 - x(zdraw()) - x(ybeam()), -y(xdraw()), work_z - 500 ])
+      component(zdraw(), "zdraw back");
+
 }
 
 color(mdf)
@@ -148,9 +153,10 @@ color(mdf)
     translate([ 0, 0, -(bbox_z - work_z) ] )
       component(top(), "surface (upper)");
 
-  translate(bbox000(top()))
-    translate([ 0, 0, clearance_z + z(xbeam()) ])
-      component(top(), "surface (lower)");
+  translate(bbox000(dtop()))
+    translate([ 0, 0, (work_z - 500 + z(xdraw())) ] )
+      component(dtop(), "surface (upper)");
+
 }
 
 //%cube([bbox_x, bbox_y, bbox_z]);
