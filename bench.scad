@@ -123,7 +123,7 @@ color(pine)
 
   translate(fbox000(ybeam()))
     translate([ bbox_x/3, y(xbeam()), clearance_z ])
-      #component(ybeam(), "ybeam");
+      component(ybeam(), "ybeam");
 
   translate(fbox000(ybeam()))
     translate([ bbox_x - bbox_x/3, y(xbeam()), clearance_z ])
